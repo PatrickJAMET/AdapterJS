@@ -275,7 +275,14 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     webrtcDetectedBrowser = 'blink';
     // TODO: detected WebRTC version
   }
-
+  if ((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+  (navigator.userAgent.match(/chrome/ig) || []).length === 0 && 
+  navigator.userAgent.indexOf('Safari/') > 0) {
+    webrtcDetectedBrowser = 'safari';
+    webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
+    webrtcMinimumVersion = 7;
+    webrtcDetectedType = 'plugin';
+  }
   window.webrtcDetectedBrowser = webrtcDetectedBrowser;
   window.webrtcDetectedVersion = webrtcDetectedVersion;
   window.webrtcMinimumVersion  = webrtcMinimumVersion;
@@ -347,6 +354,7 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
         AdapterJS.WebRTCPlugin.isPluginInstalled(
           AdapterJS.WebRTCPlugin.pluginInfo.prefix,
           AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+          AdapterJS.WebRTCPlugin.pluginInfo.type,
           function() { // plugin now installed
             clearInterval(pluginInstallInterval);
             AdapterJS.WebRTCPlugin.defineWebRTCInterface();
@@ -534,10 +542,13 @@ webrtcDetectedVersion = null;
 webrtcMinimumVersion  = null;
 
 // Check for browser types and react accordingly
-if ( navigator.mozGetUserMedia || 
+
+if ( (navigator.mozGetUserMedia || 
   navigator.webkitGetUserMedia || 
   (navigator.mediaDevices && 
-    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) ) { 
+    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/))) 
+  && !((navigator.userAgent.match(/android/ig) || []).length === 0 &&
+    (navigator.userAgent.match(/chrome/ig) || []).length === 0 && navigator.userAgent.indexOf('Safari/') > 0)){ 
 
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
@@ -859,11 +870,11 @@ if ( navigator.mozGetUserMedia ||
   };
 
   AdapterJS.WebRTCPlugin.isPluginInstalled =
-    function (comName, plugName, installedCb, notInstalledCb) {
+    function (comName, plugName, plugType, installedCb, notInstalledCb) {
     if (!isIE) {
-      var pluginArray = navigator.plugins;
+      var pluginArray = navigator.mimeTypes;
       for (var i = 0; i < pluginArray.length; i++) {
-        if (pluginArray[i].name.indexOf(plugName) >= 0) {
+        if (pluginArray[i].type.indexOf(plugType) >= 0) {
           installedCb();
           return;
         }
@@ -1208,10 +1219,12 @@ if ( navigator.mozGetUserMedia ||
     }
   };
 
+
   // Try to detect the plugin and act accordingly
   AdapterJS.WebRTCPlugin.isPluginInstalled(
     AdapterJS.WebRTCPlugin.pluginInfo.prefix,
     AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+    AdapterJS.WebRTCPlugin.pluginInfo.type,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 
