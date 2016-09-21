@@ -323,7 +323,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
   if (navigator.userAgent.indexOf('Safari/') > 0) {
     webrtcDetectedBrowser = 'safari';
     webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
-    webrtcMinimumVersion = 9;
+    webrtcMinimumVersion = 7;
     webrtcDetectedType = 'plugin';
   }
 
