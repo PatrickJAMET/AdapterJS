@@ -303,13 +303,22 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     // Chrome 1+
     // Bowser and Version set in Google's adapter
     webrtcDetectedType    = 'webkit';
-  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && 
-    !!window.CSS) {
-    // Blink engine detection
-    webrtcDetectedBrowser = 'blink';
+
+  
+  } else if ((webrtcDetectedBrowser === 'chrome'|| webrtcDetectedBrowser === 'opera') && !!window.CSS) {
+    // Chrome / Opera mobile browsers
+    webrtcDetectedType = 'webkit';
+
+    // Samsung browser detection (should we care?)
+    if (navigator.userAgent.indexOf('SamsungBrowser') > 0) {
+      webrtcDetectedBrowser = 'SamsungBrowser';
+      webrtcDetectedVersion = parseFloat((navigator.userAgent.match(/SamsungBrowser\/(.*)\ /) || ['', '0'])[1], 10);
+      webrtcDetectedType = 'blink';
+      webrtcMinimumVersion = 0;
+    }
     // TODO: detected WebRTC version
 
-    var blinkAndroidAgent = navigator.userAgent.match(/[A|a]ndroid\s([0-9\.]*)/);
+    /*var blinkAndroidAgent = navigator.userAgent.match(/[A|a]ndroid\s([0-9\.]*)/);
 
     // Detect android browser agent
     if (blinkAndroidAgent) {
@@ -317,10 +326,11 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
       webrtcDetectedBrowser = 'android';
       webrtcDetectedVersion = parseFloat(blinkAndroidAgent[1]);
       webrtcDetectedType    = 'webkit';
-    }
+    }*/
   }
 
-  if (navigator.userAgent.indexOf('Safari/') > 0) {
+  if ((navigator.userAgent.match(/[A|a]ndroid/g) || []).length === 0 &&
+    (navigator.userAgent.match(/[C|c]hrome/g) || []).length === 0 && navigator.userAgent.indexOf('Safari/') > 0) {
     webrtcDetectedBrowser = 'safari';
     webrtcDetectedVersion = parseInt((navigator.userAgent.match(/Version\/(.*)\ /) || ['', '0'])[1], 10);
     webrtcMinimumVersion = 7;
